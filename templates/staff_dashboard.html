@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Staff Dashboard {{ username }}
+{% endblock %}
+
+{% block content %}
+
+Welcome, {{ username }}
+<h1>Notice: Your account is [Pending/Approved] by administration.*</h1>
+
+<div class="form">
+    <form>
+        <select name="role" id="role" required>
+            <option value="open">Open</option>
+            <option value="close">Closed</option>
+            <option value="completed">Completed</option>
+        </select><br>
+        <input type="submit">
+    </form>
+</div>
+
+{% endblock %}

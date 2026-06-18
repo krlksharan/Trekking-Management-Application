@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+
+<h1>WalkJog: The Trekking Management System</h1>
+
+<form action="login-validation" method="post">
+    <h1>Login</h1>
+    <!-- Username -->
+    <label for="username">Username</label><br>
+    <input type="text" id="username" placeholder="lokesh" required name="username"><br>
+    <!-- Password -->
+    <label for="password">Password</label><br>
+    <input type="password" id="password" placeholder="••••••••" required name="password"><br>
+    <!-- Role -->
+    <label for="role">Role</label><br>
+    <select name="role" id="role" required>
+        <option value="admin">Admin</option>
+        <option value="trek-staff">Trekk Staff</option>
+        <option value="user-trekker">User(Trekker)</option>   
+    </select> <br>
+    
+    <input type='submit' value='Login'>
+
+</form>
+
+{% endblock %}
