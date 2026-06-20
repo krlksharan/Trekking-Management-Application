@@ -1,99 +1,113 @@
 from flask import Flask, request, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 import os
+from models import db, Users, Trek, StaffProfile, Booking
+
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///trekking.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-db = SQLAlchemy(app)
+db.init_app(app)
 
-class admin(db.Model):
-    __tablename__ = 'admin'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(12), unique=True, nullable=False)
-    password = db.Column(db.String(12), nullable=False)
-    role = db.Column(db.String(12), nullable=False)
-    
-class trekk_staff(db.Model):
-    __tablename__ = 'trekk_staff'
-
-class user_trakker(db.Model):
-    __tablename__ = 'user_trakker'
-
-
-@app.route("/")
+     
+@app.route('/')
 def home():
-   return render_template('home.html')
+    return render_template('home.html')
 
-# =================Admin==================
-@app.route("/admin/dashboard")
-def admin_dashboard():
-    return render_template("admin_dashboard.html", ) 
+# ================Login Validation================
+@app.route('/login', methods=["GET", "POST"])
+def login_validation():
     
-# =================Add Trek==================
-@app.route("/admin/add", methods = ['POST'])
-def admin_add():
-    trek_id = request.form.get("trek_id")
-    trek_name = request.form.get("trek_name")
-    location = request.form.get("location")
-    duration = request.form.get("duration")
-    slots = request.form.get("slots")
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
+    if request.method == 'GET':
+        return render_template('home.html')
     
-    return "<h2>Trek Added Successfully</h2>"
+    username = request.form.get("username")
+    password = request.form.get("password")
+    selected_role = request.form.get("role")
+    user = Users.query.filter_by(username=username).first()
     
-# =================Edit Trek==================  
-@app.route("/admin/edit/<int:trek_id>", methods=['POST'])
-def admin_edit(trek_id):
+    # print(selected_role, user.role)
     
-    trek = Trek.get(trek_id)
-    trek.trek_id = request.form.get("trek_id")
-    trek_name = request.form.get("trek_name")
-    location = request.form.get("location")
-    duration = request.form.get("duration")
-    slots = request.form.get("slots")
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
-    db.commit()
-    return "<h2>Trek Updated Successfully</h2>"
+    if not user:
+        return "User doesn't exist"
+    
+    if not check_password_hash(user.password, password):
+        return "Incorrect password"
 
-# =================Form Submit=================
-@app.route('/login-validation', methods=['POST'])
-def login_submit():
+    if user.role != selected_role:
+        return "Incorrect role selected"
+
+    if user.role == "admin":
+        return redirect("/admin/dashboard/{user.id}")
+
+    elif user.role == "Trek Staff":
+        return redirect(f"/staff/dashboard/{user.id}")
+
+    elif user.role == "User(Trekker)":
+        return redirect(f"/user/dashboard/{user.id}")
+
+    return "Invalid role"
+
+@app.route('/register', methods=['GET','POST'])
+def registration():
+    
+    if request.method == 'GET':
+        return render_template('register.html')
+    
     username = request.form.get('username')
     password = request.form.get('password')
-    selected_role = request.form.get('user_role')
-    if not username or not password:
-        return redirect('/')
-    
-    if selected_role == 'admin':
-        return redirect('/admin/dashboard')
-    
-    elif selected_role == 'staff':
-        staff_login = username.lower().replace(" ", "-")
-        return redirect(f'/staff/dashboard/{staff_login}')
-    
-    elif selected_role == 'user':
-        user_login = username.lower().replace(" ", "-")
-        return redirect(f'/user/dashboard/{user_login}')
-    
-    return redirect('/')
-    
-# =================Staff Login==================
-@app.route('/staff/dashboard/<staff>')
-def staff_login(staff):
-    return render_template("staff_dashboard.html", staff_name=staff.replace("-", " ").title())
+    selected_role = request.form.get('role')
 
-@app.route('/user/dashboard/<username>')
-def trekker(username):
-    profile = {
-        "name": username.replace("-", " ").title()
-    }
-    return render_template("user_dashboard.html", username=username, profile=profile)
+    hashed_pass = generate_password_hash(password)
 
+    exists = Users.query.filter_by(
+        username=username
+    ).first()
+
+    if exists:
+        return "Username already exists"
+
+    new_account = Users(
+        username=username,
+        password=hashed_pass,
+        role=selected_role
+    )
+
+    db.session.add(new_account)
+    db.session.commit()
+
+    return "Registration successful"
+
+#================Admin Dashboard================
+@app.route("/admin/dashboard/<username>")
+def admin_dashboard(username):
+    active_bookings = Booking.query.all()
+
+    return render_template('admin_dashboard.html', active_bookings=active_bookings,username=username)
+
+# ================Staff Dashboard================
+@app.route("/staff/dashboard/<username>")
+def staff_dashboard(username):
+    return render_template('staff_dashboard.html', username=username)
+
+# ================User Dashboard================
+@app.route("/user/dashboard/<user_id>")
+def user_dashboard(user_id):
+    trek = Trek.query.all()
+    booking = Booking.query.filter_by(user_id = user_id)
+    user = Users.query.filter_by(id= user_id).first()
+    return render_template(
+        "user_dashboard.html",
+        treks=trek,
+        bookings=booking,
+        user_id=user_id
+    )
+    
 
     
 if __name__ == "__main__":
-    app.run(host='localhost', port=8000, debug=True)
+    
+    app.run(host='localhost', port=5000, debug=True)

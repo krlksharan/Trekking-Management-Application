@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %} 
+WalkJog - Registration 
+{% endblock title %}
+
+{% block content %}
+<div class="page-header-center">
+    <h1>Create an Account</h1>
+    <p>Join the Trekking Management System</p>
+</div>
+
+<div class="glass-card form-container">
+    <form action="/register" method="post">
+        <h2 class="form-title">Register</h2>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Choose a username" required name="username">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required name="password">
+        </div>
+        
+        <div class="form-group form-group-last">
+            <label for="role">Select Role</label>
+            <select name="role" id="role" required>
+                <option value="Trek Staff">Trekk Staff</option>
+                <option value="User(Trekker)">User (Trekker)</option>   
+            </select>
+        </div>
+        
+        <!-- Beautiful cut-corner button for register -->
+        <button type="submit" class="cut-corner-btn">Register</button>
+    </form>
+</div>
+{% endblock %}

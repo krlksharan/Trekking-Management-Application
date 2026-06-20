@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Staff Dashboard - {{ username }}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Staff Portal - {{ username }}</h1>
+    <span class="status-badge status-pending">Status: Pending Approval</span>
+</div>
+
+<div class="glass-card card-spacing notice-card">
+    <h3>Notice</h3>
+    <p class="no-bottom-margin">Your account is currently <strong>Pending</strong> by administration. Please wait for approval before accessing full staff features.</p>
+</div>
+
+<div class="glass-card form-container no-margin">
+    <h3 class="subsection-title">Update Trek Status</h3>
+    <form>
+        <div class="form-group">
+            <label for="role">Assign Trek Status</label>
+            <select name="role" id="role" required>
+                <option value="open">Open (Accepting Bookings)</option>
+                <option value="close">Closed (Fully Booked)</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <button type="submit" class="cut-corner-btn">Update Status</button>
+    </form>
+</div>
+{% endblock %}

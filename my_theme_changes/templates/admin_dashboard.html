@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+🛡️ Administrator Portal
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Administrator Portal</h1>
+    <span class="status-badge status-open">System Online</span>
+</div>
+
+<div class="stats-grid">
+    <div class="glass-card stat-card">
+        <h1>Total Treks</h1>
+        <p>12</p> <!--Future Upgration-->
+    </div>
+
+    <div class="glass-card stat-card">
+        <h1>Pending Staff</h1>
+        <p>4</p> <!--Future Upgration-->
+    </div>
+
+    <div class="glass-card stat-card">
+        <h1>Active Bookings</h1>
+        <p>38</p> <!--Future Upgration-->
+    </div>
+</div>
+
+<hr>
+
+<div class="glass-card">
+    <h2 class="section-title">Active Bookings Overview</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Assigned Staff ID</th>
+                <th>Status</th>
+            </tr>
+            
+            {% for active in active_bookings %}
+            <tr>
+                <td>{{ active.name }}</td>
+                <td>{{ active.location }}</td>
+                <td>{{ active.assigned_staff_id }}</td>
+                <td>
+                    <span class="status-badge {% if active.status == 'Confirmed' %}status-open{% elif active.status == 'Pending' %}status-pending{% else %}status-closed{% endif %}">
+                        {{ active.status }}
+                    </span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>Everest Base Camp</td>
+                <td>Nepal</td>
+                <td>STF-001</td>
+                <td><span class="status-badge status-open">Confirmed</span></td>
+            </tr>
+            <tr>
+                <td>Inca Trail</td>
+                <td>Peru</td>
+                <td>STF-042</td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

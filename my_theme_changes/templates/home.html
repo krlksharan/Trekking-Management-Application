@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+WalkJog - Home
+{% endblock %}
+
+{% block content %}
+<div class="page-header-center">
+    <h1>WalkJog 🏔️</h1>
+    <p>The Ultimate Trekking Management System</p>
+</div>
+
+<div class="glass-card form-container">
+    <form action="/login" method="post">
+        <h2 class="form-title">Sign In</h2>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required name="username">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required name="password">
+        </div>
+        
+        <div class="form-group form-group-last">
+            <label for="role">Select Role</label>
+            <select name="role" id="role" required>
+                <option value="admin">Admin</option>
+                <option value="trek-staff">Trekk Staff</option>
+                <option value="user-trekker">User (Trekker)</option>   
+            </select>
+        </div>
+        
+        <!-- Beautiful cut-corner button for login -->
+        <button type="submit" class="cut-corner-btn">Login</button>
+    </form>
+</div>
+{% endblock %}

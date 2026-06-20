@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}
+User Dashboard - {{ username }}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Welcome, {{ username }}</h1>
+    <span class="status-badge status-open">User Profile Active</span>
+</div>
+
+<div class="glass-card card-spacing">
+    <h2 class="section-title">Available Open Treks</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Trek ID</th>
+                <th>Trek Name</th>
+                <th>Location</th>
+                <th>Start Date</th>
+                <th>Action</th>
+            </tr>
+            {% for trek in treks %}
+            <tr>
+                <td>{{ trek.trek_id }}</td>
+                <td><strong>{{ trek.trek_name }}</strong></td>
+                <td>{{ trek.trek_location }}</td>
+                <td>{{ trek.start_date }}</td>
+                <td>
+                    <button class="cut-corner-btn btn-small">Book Spot</button>
+                </td>
+            </tr>
+            {% else %}
+            
+            <tr>
+                <td>TRK-101</td>
+                <td><strong>Himalayan Base Camp</strong></td>
+                <td>Nepal</td>
+                <td>2026-10-15</td>
+                <td>
+                    <button class="cut-corner-btn btn-small">Book Spot</button>
+                </td>
+            </tr>
+            <tr>
+                <td>TRK-102</td>
+                <td><strong>Patagonia Explorer</strong></td>
+                <td>Argentina</td>
+                <td>2026-11-05</td>
+                <td>
+                    <button class="cut-corner-btn btn-small">Book Spot</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h2 class="section-title">Your Booking History</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Booking ID</th>
+                <th>Trek Name</th>
+                <th>Booking Date</th>
+                <th>Booking Status</th>
+            </tr>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.booking_id }}</td>
+                <td><strong>{{ booking.trek_name }}</strong></td>
+                <td>{{ booking.booking_date }}</td>
+                <td>
+                    <span class="status-badge {% if booking.status == 'Confirmed' %}status-open{% elif booking.status == 'Pending' %}status-pending{% else %}status-closed{% endif %}">
+                        {{ booking.status }}
+                    </span>
+                </td>
+            </tr>
+            {% else %}
+            <!-- Fallback Data For Preview -->
+            <tr>
+                <td>BK-592</td>
+                <td><strong>Alps Circuit</strong></td>
+                <td>2026-05-12</td>
+                <td><span class="status-badge status-closed">Completed</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

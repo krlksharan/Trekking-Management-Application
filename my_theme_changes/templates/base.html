@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %} WalkJog: The Trekking Management System {% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- macOS Style Menu Bar -->
+  <nav class="macos-menubar">
+    <div class="menubar-left">
+      <div class="logo">🏔️ WalkJog</div>
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </div>
+    <div class="menubar-right">
+      <span id="sys-time">Thu 9:41 AM</span>
+    </div>
+  </nav>
+
+  <div class="app-container">
+    <div class="macos-window">
+      <!-- Window Title Bar -->
+      <div class="window-titlebar">
+        <div class="traffic-lights">
+          <div class="light red"></div>
+          <div class="light yellow"></div>
+          <div class="light green"></div>
+        </div>
+        <div class="window-title">WalkJog System</div>
+      </div>
+      
+      <!-- Window Content Area -->
+      <div class="window-content">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple script to update the clock
+    function updateClock() {
+      const now = new Date();
+      const options = { weekday: 'short', hour: 'numeric', minute: 'numeric' };
+      document.getElementById('sys-time').textContent = now.toLocaleDateString('en-US', options).replace(',', '');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+
+</body>
+</html>
