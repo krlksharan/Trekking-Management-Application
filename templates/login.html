@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}
+Login
+{% endblock %}
+
+
+{% block content %}
+<style>
+
+</style>
+<div class="form-container">
+    <form action="login" method="post">
+        <h2>Login</h2>
+        <label for="username">Username</label><br>
+        <input type="text" id="username" name="username" placeholder="lokesh" required> <br>
+
+        <label for="password">Password</label><br>
+        <input type="password" placeholder="••••••••" name="password" required><br>
+
+        <label for="role">Role</label><br>
+        <select name="role" id="role">
+            <option value="admin">Admin</option>
+            <option value="TrekkStaff">Trek Staff</option>
+            <option value="User(Trekker)">User(Trekker)</option>
+        </select>
+        <button type="submit">Login</button>
+    </form>
+
+</div>
+
+{% endblock %}

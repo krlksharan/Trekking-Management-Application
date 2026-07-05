@@ -1,23 +1,94 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}
-Staff Dashboard {{ username }}
-{% endblock %}
+{% block title  %}
+Staff Dasbhoard {{usernmae}}
+{% endblock title  %}
 
 {% block content %}
 
-Welcome, {{ username }}
-<h1>Notice: Your account is [Pending/Approved] by administration.*</h1>
+Welcome, {{username}}
 
-<div class="form">
-    <form>
-        <select name="role" id="role" required>
-            <option value="open">Open</option>
-            <option value="close">Closed</option>
-            <option value="completed">Completed</option>
-        </select><br>
-        <input type="submit">
-    </form>
+<h2>Staff Profile </h2>
+<table border="1px">
+        <tr>
+            <td>
+                Staff ID
+            </td>
+            <td>
+                Name
+            </td>
+            <td>
+                Contact Details
+            </td>
+            <td>
+                Assigned Treks
+            </td>
+            <td>
+                Status
+            </td>
+            <td>
+                Created At
+            </td>
+        </tr>
+
+        <tr>
+            
+
+            {% for staff in StaffProfile %}
+            <tr>
+                <td>
+                    {{ staff.staff_id }}
+                </td>
+                <td>
+                    {{ staff.name }}
+                </td>
+                <td>
+                    {{ staff.contact_details }}
+                </td>
+                <td>
+                    {{ staff.assigned_treks }}
+                </td>
+                <td>
+                    {{ staff.approval_status }}
+                </td>
+                <td>
+                    {{ staff.created_at }}
+                </td>
+            </tr>
+            {% end for %}
+</table>
+
+<h2>Assigned Treks </h2>
+{{% for trek in treks %}}
+<form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post">
+    <h3> {{ trek.terk_name }}</h3>
+    <p> Location : {{ trek.location }}</p>
+    <label>Available Slots </label>
+    <input type="number"
+            name="availabe_slots"
+            value="{{ trek.available_slots }}">
+
+            <br><br>
+
+    <label>Status</label>
+
+    <select name="status">
+        <option value="Open">Open</option>
+        <option value="Closed">Closed</option>
+    </select>
+
+    
+    
+</input>
+</form>
+
+
+
+
+<div>
+<button type="submit">Update Trek </button>
+<button type ='button' class="View Participants"> View Participants </button>
 </div>
 
-{% endblock %}
+{% endfor %}
+{% endblock content %}

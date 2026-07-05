@@ -18,6 +18,7 @@ class Users(db.Model):
         db.String(20), 
         nullable=False)
     
+    
 # ===========User Trekker===========
 class Trek(db.Model):
     __tablename__ = 'treks'
@@ -49,7 +50,7 @@ class Trek(db.Model):
 
     status = db.Column(
         db.String(20),
-        default='Open'
+        default='Pending'
     )
 
     start_date = db.Column(
@@ -59,24 +60,44 @@ class Trek(db.Model):
     end_date = db.Column(
         db.Date
     )
-
+    is_blacklisted = db.Column(
+        db.Boolean,
+        default=False
+    )
+    
+    staff_id = db.Column(
+        db.Integer,
+        db.ForeignKey('staff_profile.staff_id'),
+        nullable=True
+    )
 
 class StaffProfile(db.Model):
     __tablename__ = 'staff_profile'
 
     staff_id = db.Column(
-        db.Integer, 
+        db.Integer,
         db.ForeignKey('users.id'),
         primary_key=True,
-        nullable=False            
+        nullable=False
     )
 
+    name = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False
+    )
+
+    contact_details = db.Column(
+        db.String(15),
+        nullable=False
+    )
+
+    assigned_treks = db.Column(
+        db.String(200),
+        nullable=True
+    )
+    
     approval_status = db.Column(
-        db.String(20),
-        default='Pending'
-    )
-
-    status = db.Column(
         db.String(20),
         default='Pending'
     )
@@ -85,6 +106,21 @@ class StaffProfile(db.Model):
         db.DateTime,
         default=datetime.now
     )
+
+class UserProfile(db.Model):
+    __tablename__ = 'user_profile'
+    
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True,
+        nullable=False
+    )
+    
+    name = db.Column(db.String(50), nullable=False)
+    contact_details = db.Column(db.String(15), nullable=False)
+    is_blacklisted = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     
 class Booking(db.Model):
     __tablename__ = 'booking'

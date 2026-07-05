@@ -1,5 +1,74 @@
-{% extends "Base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}
-Trekks
-{% end block %}
+Treks
+{% endblock %}
+
+{% block content %}
+
+<h1>Manage Treks</h1>
+
+<div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 25px;">
+    <a href="{{ url_for('add_trek') }}" class="cut-corner-btn" style="width: auto; text-decoration: none;">
+        + Add New Trek
+    </a>
+    <a href="/admin/dashboard/admin" class="cut-corner-btn btn-secondary" style="width: auto; text-decoration: none;">
+        Back to Dashboard
+    </a>
+</div>
+
+<form method="GET" action="/admin/dashboard/treks" style="display: flex; gap: 10px; align-items: center; max-width: 500px; margin-bottom: 25px;">
+    <input type="text" name="search" placeholder="Search treks by name..." style="flex: 1; margin-bottom: 0;">
+    <button type="submit" class="cut-corner-btn" style="width: auto; margin-bottom: 0;">Search</button>
+</form>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Difficulty</th>
+        <th>Available Slots</th>
+        <th>Status</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for trek in treks %}
+    <tr>
+
+        <td>{{ trek.trek_id }}</td>
+        <td>{{ trek.trek_name }}</td>
+        <td>{{ trek.location }}</td>
+        <td>{{ trek.difficulty }}</td>
+        <td>{{ trek.available_slots }}</td>
+        <td>{{ trek.status }}</td>
+        <td>{{ trek.start_date }}</td>
+        <td>{{ trek.end_date }}</td>
+
+        <td>
+            <div style="display: flex; gap: 5px;">
+                <a href="{{ url_for('edit_trek', trek_id=trek.trek_id) }}">
+                    <button class="cut-corner-btn" style="padding: 5px 10px; font-size: 0.9rem;">Edit</button>
+                </a>
+
+                <a href="{{ url_for('delete_trek', trek_id=trek.trek_id) }}">
+                    <button class="cut-corner-btn" style="padding: 5px 10px; font-size: 0.9rem; background-color: var(--danger-color, #ef4444);">Delete</button>
+                </a>
+
+                {% if trek.status != 'Approved' and trek.status != 'Open' %}
+                <a href="{{ url_for('approve_trek', trek_id=trek.trek_id) }}">
+                    <button class="cut-corner-btn" style="padding: 5px 10px; font-size: 0.9rem; background-color: var(--success-color, #10b981);">Approve</button>
+                </a>
+                {% endif %}
+            </div>
+        </td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
