@@ -77,20 +77,6 @@ Welcome
     </table>
 </div>
 
-<hr>
-
-<div>
-    <h1>Edit Profile</h1>
-    <form method="POST" action="/user/profile/edit/{{ user_id }}" style="max-width: 400px;">
-        <label>Name</label><br>
-        <input type="text" name="name" value="{{ user_profile.name if user_profile else '' }}" required style="width: 100%; padding: 5px;"><br><br>
-        
-        <label>Contact Details</label><br>
-        <input type="text" name="contact_details" value="{{ user_profile.contact_details if user_profile else '' }}" required style="width: 100%; padding: 5px;"><br><br>
-        
-        <button type="submit">Save Profile</button>
-    </form>
-</div>
 
 {% endblock %}
 
