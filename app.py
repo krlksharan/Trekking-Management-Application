@@ -24,37 +24,37 @@ def login_validation():
     if request.form == "GET":
         return render_template("login.html")
   
-    if request.form == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        role = request.form.get("username")
-        user = Users.query.filter_by(username=username).first()
-        
-        if not user:
-            return render_template('login.html', error="User doesn't exist")
-        
-        if not check_password_hash(user.password,password):
-            return render_template('login.html', error="Incorrect password")
-        
-        #-------------Role-------------
-        
-        if user.role != role:
-            return render_template('login.html', error="Incorrect role selected")
+    
+    username = request.form.get("username")
+    password = request.form.get("password")
+    role = request.form.get("role")
+    user = Users.query.filter_by(username=username).first()
+    
+    if not user:
+        return render_template('login.html', error="User doesn't exist")
+    
+    if not check_password_hash(user.password,password):
+        return render_template('login.html', error="Incorrect password")
+    
+    #-------------Role-------------
+    
+    if user.role != role:
+        return render_template('login.html', error="Incorrect role selected")
 
-        elif user.role == 'admin':
-            return redirect (f'/admin/dashboard/{user.usernmae}')
-        elif user.role == "TrekkStaff":
-            staff = StaffProfile.query.filter_by(staff.staff_id==Users.id)
-            
-            #---------------Staff---------------
-            
-            if not staff:
-                return "Staff profile not found"
-            else:
-                return render_template(f"/staff/dashboard/{user.username}")
-            #---------------Staff---------------
-        elif user.role == "User(Trekker)":
-            return redirect (f'/user/dashboard/{user.user_id}')
+    elif user.role == 'admin':
+        return redirect (f'/admin/dashboard/{user.username}')
+    elif user.role == "TrekkStaff":
+        staff = StaffProfile.query.filter_by(staff_id=user.user_id)
+        
+        #---------------Staff---------------
+        
+        if not staff:
+            return "Staff profile not found"
+        else:
+            return render_template(f"/staff/dashboard/{user.username}")
+        #---------------User---------------
+    elif user.role == "User(Trekker)":
+        return redirect (f'/user/dashboard/{user.id}')
     return render_template('login.html', error="Invalid role")
             
 @app.route('/register', methods=['GET','POST'])
@@ -235,14 +235,19 @@ def blacklist_staff(staff_id):
 @app.route("/staff/dashboard/<username>")
 def staff_dashboard(username):
     
+    user = Users.query.filter_by(username=username).first_or_404()
+    staff_data = StaffProfile.query.filter_by(staff_id=user.id).all()
+    trek_data = Trek.query.filter_by(staff_id=user.id).all()
     
-    return render_template('staff_dashboard.html', username=Users.username,StaffProfile=StaffProfile )
+    return render_template('staff_dashboard.html', username=username, staff_profiles=staff_data, treks=trek_data )
 
 
 @app.route('/staff/update-trek/<int:trek_id>',
         methods=['POST'])
 def update_trek(trek_id):
 
+    if not user:
+            return redirect('/login')
     trek = Trek.query.get_or_404(trek_id)
 
     trek.available_slots = request.form.get(

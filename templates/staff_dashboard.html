@@ -1,94 +1,58 @@
 {% extends "base.html" %}
 
-{% block title  %}
-Staff Dasbhoard {{usernmae}}
-{% endblock title  %}
+{% block title %}
+Staff Dashboard {{ username }}
+{% endblock title %}
 
 {% block content %}
 
-Welcome, {{username}}
+Welcome, {{ username }}
 
-<h2>Staff Profile </h2>
+<h2>Staff Profile</h2>
 <table border="1px">
-        <tr>
-            <td>
-                Staff ID
-            </td>
-            <td>
-                Name
-            </td>
-            <td>
-                Contact Details
-            </td>
-            <td>
-                Assigned Treks
-            </td>
-            <td>
-                Status
-            </td>
-            <td>
-                Created At
-            </td>
-        </tr>
+    <tr>
+        <td>Staff ID</td>
+        <td>Name</td>
+        <td>Contact Details</td>
+        <td>Assigned Treks</td>
+        <td>Status</td>
+        <td>Created At</td>
+    </tr>
 
-        <tr>
-            
-
-            {% for staff in StaffProfile %}
-            <tr>
-                <td>
-                    {{ staff.staff_id }}
-                </td>
-                <td>
-                    {{ staff.name }}
-                </td>
-                <td>
-                    {{ staff.contact_details }}
-                </td>
-                <td>
-                    {{ staff.assigned_treks }}
-                </td>
-                <td>
-                    {{ staff.approval_status }}
-                </td>
-                <td>
-                    {{ staff.created_at }}
-                </td>
-            </tr>
-            {% end for %}
+    {% for staff in staffs %}
+    <tr>
+        <td>{{ staff.staff_id }}</td>
+        <td>{{ staff.name }}</td>
+        <td>{{ staff.contact_details }}</td>
+        <td>{{ staff.assigned_treks }}</td>
+        <td>{{ staff.approval_status }}</td>
+        <td>{{ staff.created_at }}</td>
+    </tr>
+    {% endfor %}
 </table>
 
-<h2>Assigned Treks </h2>
-{{% for trek in treks %}}
+<h2>Assigned Treks</h2>
+{% for trek in treks %}
 <form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post">
-    <h3> {{ trek.terk_name }}</h3>
-    <p> Location : {{ trek.location }}</p>
-    <label>Available Slots </label>
-    <input type="number"
-            name="availabe_slots"
-            value="{{ trek.available_slots }}">
-
-            <br><br>
+    <h3>{{ trek.trek_name }}</h3>
+    <p>Location: {{ trek.location }}</p>
+    
+    <label>Available Slots</label>
+    <input type="number" name="available_slots" value="{{ trek.available_slots }}">
+    
+    <br><br>
 
     <label>Status</label>
-
     <select name="status">
         <option value="Open">Open</option>
         <option value="Closed">Closed</option>
     </select>
 
-    
-    
-</input>
+    <div>
+        <button type="submit">Update Trek</button>
+        <button type="button" class="View Participants">View Participants</button>
+    </div>
 </form>
-
-
-
-
-<div>
-<button type="submit">Update Trek </button>
-<button type ='button' class="View Participants"> View Participants </button>
-</div>
-
 {% endfor %}
+
 {% endblock content %}
