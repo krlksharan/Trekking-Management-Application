@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}
+User Dashboard
+{% endblock %}
+
+{% block content %}
+
+Welcome
+
+<div>
+    <h1>Available Open Treks</h1>
+    
+    <form method="GET" action="/user/dashboard/{{ user_id }}" style="display: flex; gap: 10px; align-items: center; max-width: 500px; margin-bottom: 25px;">
+        <input type="text" name="search" placeholder="Search treks..." style="flex: 1; margin-bottom: 0;">
+        <button type="submit" class="cut-corner-btn" style="width: auto; margin-bottom: 0;">Search</button>
+    </form>
+    <table border="1">
+    <tr>
+        <th>Trek ID</th>
+        <th>Trek Name</th>
+        <th>Location</th>
+        <th>Start Date</th>
+        <th>Action</th>
+    </tr>
+    {% for trek in treks %}
+    <tr>
+        <td>{{ trek.trek_id }}</td>
+        <td>{{ trek.trek_name }}</td>
+        <td>{{ trek.location }}</td>
+        <td>{{ trek.start_date }}</td>
+        <td>
+            <form action="{{ url_for('book_trek', trek_id=trek.trek_id) }}" method="POST">
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <button type="submit" {% if trek.available_slots <= 0 %}disabled{% endif %}>
+                    {% if trek.available_slots > 0 %}Book Spot{% else %}Full{% endif %}
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+</div>
+
+<hr>
+
+<div>
+    <h1>
+        Your Booking History
+    </h1>
+    <table border="1">
+        <tr>
+        <th>
+            Booking ID
+        </th>
+        <th>
+            Trek Name
+        </th>
+        <th>
+            Booking Date
+        </th>
+        <th>
+            Booking Status
+        </th>
+        </tr>
+        
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.booking_id }}</td>
+            <td>{{ booking.trek_name }}</td>
+            <td>{{ booking.booking_date}}
+            <td>{{ booking.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<hr>
+
+<div>
+    <h1>Edit Profile</h1>
+    <form method="POST" action="/user/profile/edit/{{ user_id }}" style="max-width: 400px;">
+        <label>Name</label><br>
+        <input type="text" name="name" value="{{ user_profile.name if user_profile else '' }}" required style="width: 100%; padding: 5px;"><br><br>
+        
+        <label>Contact Details</label><br>
+        <input type="text" name="contact_details" value="{{ user_profile.contact_details if user_profile else '' }}" required style="width: 100%; padding: 5px;"><br><br>
+        
+        <button type="submit">Save Profile</button>
+    </form>
+</div>
+
+{% endblock %}
+
