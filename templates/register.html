@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %} Registration {% endblock title %}
+
+{% block content %}
+<h1>WalkJog: The Trekking Management System</h1>
+<h2>Register</h2>
+
+<form action="register" method="post">
+    <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="ym496" required name="username">
+    </div>
+    <br>
+    <div>
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Yogendra" required name="name">
+    </div>
+    <br>
+    <div>
+        <label for="contact_details">Contact Details (Phone/Email)</label>
+        <input type="text" id="contact_details" placeholder="1234567890" required name="contact_details">
+    </div>
+    <br>
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required name="password">
+    </div>
+    <br>
+    <div>
+        <label for="role">Role</label>
+        <select name="role" id="role" required>
+            <option value="Trek Staff">Trek Staff</option>
+            <option value="User(Trekker)">User(Trekker)</option>   
+        </select>
+    </div>
+    <br>
+    <button type="submit">Register</button>
+</form>
+
+{% if success %}
+<div>
+    <h3>Success!</h3>
+    <p>{{ success }}</p>
+    <a href="{{ url_for('login_validation') }}">Login Now</a>
+</div>
+{% endif %}
+
+{% if error %}
+<div>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
+</div>
+{% endif %}
+    
+{% endblock %}
