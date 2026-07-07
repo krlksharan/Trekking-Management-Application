@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash, url_for
+from flask import Flask, request, render_template, redirect, flash, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -35,6 +35,7 @@ def login_validation():
     
     if not check_password_hash(user.password,password):
         return render_template('login.html', error="Incorrect password")
+
     
     #-------------Role-------------
     
@@ -52,7 +53,9 @@ def login_validation():
             return "Staff profile not found"
         else:
             return render_template(f"/staff/dashboard/{user.username}")
+        
         #---------------User---------------
+        
     elif user.role == "User(Trekker)":
         return redirect (f'/user/dashboard/{user.id}')
     return render_template('login.html', error="Invalid role")
@@ -96,7 +99,16 @@ def admin_dashboard(username):
     total_staffs = StaffProfile.query.count()
     total_bookings = Booking.query.count()
 
-    active_bookings = Booking.query.all()
+    active_bookings = Booking.query.filter_by(status="Booked")
+    
+    
+    bookings_by_trek = db.session.query(
+        Trek.trek_name, db.func.count(Booking.booking_id)
+    ).outerjoin(Booking, Trek.trek_id == Booking.trek_id).group_by(Trek.trek_name).all()
+
+    trek_labels = [item[0] for item in bookings_by_trek]
+    booking_counts = [item[1] for item in bookings_by_trek]
+
 
     return render_template(
         'admin_dashboard.html',
@@ -105,14 +117,16 @@ def admin_dashboard(username):
         total_users=total_users,
         total_staffs=total_staffs,
         total_bookings=total_bookings,
-        active_bookings=active_bookings
+        active_bookings=active_bookings,
+        trek_labels=trek_labels,
+        booking_count=booking_counts
     )
 
 @app.route("/admin/dashboard/treks")
 def view_treks():
     treks = Trek.query.all()  
     
-    return render_template('treks.html', treks=treks)
+    return render_template('trek.html', treks=treks)
 
 @app.route('/admin/assign-trek/<int:staff_id>/<int:trek_id>')
 def assign_trek(staff_id, trek_id):
@@ -129,33 +143,24 @@ def assign_trek(staff_id, trek_id):
 
 # Add Trek
 
-@app.route('/admin/dashboard/add', methods=['GET', 'POST'])
+@app.route('/admin/trek/add', methods=['GET', 'POST'])
 def add_trek():
+    if 'user.id' not in session or session.get('role')!= 'admin':
+        return redirect(url_for('login_validation'))
     
-    if request.method == "POST":
-        
-        trek = Trek(
-            trek_name=request.form.get('trek_name'),
-            location = request.form.get('location'),
-            difficulty=request.form.get('difficulty'),
-            available_slots=request.form.get('available_slots'),
-            start_date=datetime.strptime(
-                request.form.get('start_date'),
-                '%Y-%m-%d'
-                
-            ).date(),
-            end_date = datetime.strptime(
-                request.form.get('end_date'),
-                '%Y-%m-%d'
-            ).date()
-        )
-        
-        db.session.add(trek)
-        db.session.commit()
-        
-        return redirect('/admin/dashboard/treks')
-    return render_template('trek_form.html')
-
+    if request.method == 'POST':
+        trek_name=request.form.get('trek_name'),
+        location=request.form.get('location'),
+        difficulty=request.form.get('difficulty'),
+        available_slots=request.form.get('available_slots'),
+        staff_id=request.form.get('staff_id')
+        start_date=datetime.striptime(request.form.get('start_date'), '%Y-%m-%d').date(),
+        end_date=datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+    
+    if request.method == 'GET':
+    
+        return render_template('trek_form.html', staffs=approve_staff)       
+     
 # Edit trek
 @app.route('/admin/dashboard/edit/<int:trek_id>', methods=['GET', 'POST'])
 def edit_trek(trek_id):
