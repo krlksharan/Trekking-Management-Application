@@ -32,6 +32,9 @@
                 {% if not staff.is_blacklisted %}
                 {% if staff.approval_status == 'Pending' %} | {% endif %}
                 <a href="{{ url_for('blacklist_staff', staff_id=staff.staff_id) }}" style="color: red;">Blacklist</a>
+                {% else %}
+                <span style="color: gray;">Blacklisted</span> | 
+                <a href="{{ url_for('unblacklist_staff', staff_id=staff.staff_id) }}" style="color: green;">Approve</a>
                 {% endif %}
             </td>
         </tr>

@@ -28,7 +28,8 @@
                 {% if not user.is_blacklisted %}
                 <a href="{{ url_for('blacklist_user', user_id=user.user_id) }}" style="color: red;">Blacklist</a>
                 {% else %}
-                <span style="color: gray;">Blacklisted</span>
+                <span style="color: gray;">Blacklisted</span> | 
+                <a href="{{ url_for('unblacklist_user', user_id=user.user_id) }}" style="color: green;">Approve</a>
                 {% endif %}
             </td>
         </tr>

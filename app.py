@@ -51,6 +51,8 @@ def login_validation():
         
         if not staff:
             return render_template('login.html', error="Staff profile not found")
+        elif staff.is_blacklisted:
+            return render_template('login.html', error="Your account has been blacklisted")
         elif staff.approval_status != 'Approved':
             return render_template('login.html', error="Your account is pending admin approval")
         else:
@@ -59,6 +61,9 @@ def login_validation():
         #---------------User---------------
         
     elif user.role == "User(Trekker)":
+        user_prof = UserProfile.query.filter_by(user_id=user.id).first()
+        if user_prof and user_prof.is_blacklisted:
+            return render_template('login.html', error="Your account has been blacklisted")
         return redirect (f'/user/dashboard/{user.id}')
     return render_template('login.html', error="Invalid role")
             
@@ -282,6 +287,20 @@ def blacklist_user(user_id):
     user_prof.is_blacklisted = True
     db.session.commit()
     
+    return redirect(url_for('manage_users'))
+
+@app.route('/admin/staff/unblacklist/<int:staff_id>')
+def unblacklist_staff(staff_id):
+    staff = StaffProfile.query.get_or_404(staff_id)
+    staff.is_blacklisted = False
+    db.session.commit()
+    return redirect('/admin/staffs')
+
+@app.route('/admin/user/unblacklist/<int:user_id>')
+def unblacklist_user(user_id):
+    user_prof = UserProfile.query.get_or_404(user_id)
+    user_prof.is_blacklisted = False
+    db.session.commit()
     return redirect(url_for('manage_users'))
 
 # ================Staff Dashboard================
