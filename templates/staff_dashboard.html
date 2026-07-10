@@ -36,10 +36,10 @@ Welcome, {{ username }}
 <form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post">
     <h3>{{ trek.trek_name }}</h3>
     <p>Location: {{ trek.location }}</p>
-    
+
     <label>Available Slots</label>
     <input type="number" name="available_slots" value="{{ trek.available_slots }}">
-    
+
     <br><br>
 
     <label>Status</label>
@@ -50,7 +50,9 @@ Welcome, {{ username }}
 
     <div>
         <button type="submit">Update Trek</button>
-        <a href="{{ url_for('trek_users', trek_id=trek.trek_id) }}" class="button" style="text-decoration: none; padding: 5px 10px; background-color: #f0f0f0; color: black; border: 1px solid #ccc; border-radius: 3px; font-size: 14px;">View Participants</a>
+        <a href="{{ url_for('trek_users', trek_id=trek.trek_id) }}" class="button"
+            style="text-decoration: none; padding: 5px 10px; background-color: #f0f0f0; color: black; border: 1px solid #ccc; border-radius: 3px; font-size: 14px;">View
+            Participants</a>
     </div>
 </form>
 {% endfor %}

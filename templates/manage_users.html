@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h1>Manage Users (Trekkers)</h1>
+<a href="/admin/dashboard/admin" class="button">Back to Dashboard</a>
+<hr>
+
+<div class="table">
+    <table border="1">
+        <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Contact Details</th>
+            <th>Joined At</th>
+            <th>Blacklisted</th>
+            <th>Actions</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.user_id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.contact_details }}</td>
+            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '' }}</td>
+            <td>{{ 'Yes' if user.is_blacklisted else 'No' }}</td>
+            <td>
+                {% if not user.is_blacklisted %}
+                <a href="{{ url_for('blacklist_user', user_id=user.user_id) }}" style="color: red;">Blacklist</a>
+                {% else %}
+                <span style="color: gray;">Blacklisted</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

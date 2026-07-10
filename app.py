@@ -45,12 +45,14 @@ def login_validation():
     if user.role == 'admin':
         return redirect (f'/admin/dashboard/{user.username}')
     elif user.role == "TrekkStaff":
-        staff = StaffProfile.query.filter_by(staff_id=user.user_id).first()
+        staff = StaffProfile.query.filter_by(staff_id=user.id).first()
         
         #---------------Staff---------------
         
         if not staff:
-            return "Staff profile not found"
+            return render_template('login.html', error="Staff profile not found")
+        elif staff.approval_status != 'Approved':
+            return render_template('login.html', error="Your account is pending admin approval")
         else:
             return redirect(f"/staff/dashboard/{user.username}")
         
@@ -69,6 +71,8 @@ def registration():
     username = request.form.get('username')
     password = request.form.get('password')
     selected_role = request.form.get('role')
+    name = request.form.get('name')
+    contact_details = request.form.get('contact_details')
 
     hashed_pass = generate_password_hash(password)
 
@@ -77,7 +81,7 @@ def registration():
     ).first()
 
     if exists:
-        return "Username already exists"
+        return render_template('register.html', error="Username already exists")
 
     new_account = Users(
         username=username,
@@ -87,6 +91,23 @@ def registration():
    
     db.session.add(new_account)
     db.session.commit()
+    
+    if selected_role == 'TrekkStaff':
+        new_staff = StaffProfile(
+            staff_id=new_account.id,
+            name=name,
+            contact_details=contact_details
+        )
+        db.session.add(new_staff)
+        db.session.commit()
+    elif selected_role == 'User(Trekker)':
+        new_user = UserProfile(
+            user_id=new_account.id,
+            name=name,
+            contact_details=contact_details
+        )
+        db.session.add(new_user)
+        db.session.commit()
 
     return render_template('register.html', success="Registration Successful")
 
@@ -95,7 +116,7 @@ def registration():
 def admin_dashboard(username):
 
     total_treks = Trek.query.count()
-    total_users = Users.query.count()
+    total_users = UserProfile.query.count()
     total_staffs = StaffProfile.query.count()
     total_bookings = Booking.query.count()
 
@@ -235,6 +256,11 @@ def approve_staff(staff_id):
     
     return redirect(request.referrer or '/admin/dashboard/treks')
 
+@app.route('/admin/staffs')
+def manage_staffs():
+    staffs = StaffProfile.query.all()
+    return render_template('manage_staffs.html', staffs=staffs)
+
 @app.route('/admin/staff/blacklist/<int:staff_id>')
 def blacklist_staff(staff_id):
     staff = StaffProfile.query.get_or_404(staff_id)
@@ -243,8 +269,20 @@ def blacklist_staff(staff_id):
     
     db.session.commit()
     
-    
     return redirect('/admin/staffs')
+
+@app.route('/admin/users')
+def manage_users():
+    users = UserProfile.query.all()
+    return render_template('manage_users.html', users=users)
+
+@app.route('/admin/user/blacklist/<int:user_id>')
+def blacklist_user(user_id):
+    user_prof = UserProfile.query.get_or_404(user_id)
+    user_prof.is_blacklisted = True
+    db.session.commit()
+    
+    return redirect(url_for('manage_users'))
 
 # ================Staff Dashboard================
 @app.route("/staff/dashboard/<username>")

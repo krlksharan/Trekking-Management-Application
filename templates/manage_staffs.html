@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Staff{% endblock %}
+
+{% block content %}
+<h1>Manage Staff</h1>
+<a href="/admin/dashboard/admin" class="button">Back to Dashboard</a>
+<hr>
+
+<div class="table">
+    <table border="1">
+        <tr>
+            <th>Staff ID</th>
+            <th>Name</th>
+            <th>Contact Details</th>
+            <th>Approval Status</th>
+            <th>Blacklisted</th>
+            <th>Actions</th>
+        </tr>
+        {% for staff in staffs %}
+        <tr>
+            <td>{{ staff.staff_id }}</td>
+            <td>{{ staff.name }}</td>
+            <td>{{ staff.contact_details }}</td>
+            <td>{{ staff.approval_status }}</td>
+            <td>{{ 'Yes' if staff.is_blacklisted else 'No' }}</td>
+            <td>
+                {% if staff.approval_status == 'Pending' %}
+                <a href="{{ url_for('approve_staff', staff_id=staff.staff_id) }}">Approve</a>
+                {% endif %}
+                
+                {% if not staff.is_blacklisted %}
+                {% if staff.approval_status == 'Pending' %} | {% endif %}
+                <a href="{{ url_for('blacklist_staff', staff_id=staff.staff_id) }}" style="color: red;">Blacklist</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

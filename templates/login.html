@@ -5,8 +5,15 @@ Login
 
 
 {% block content %}
- 
+
 <div class="form-container">
+    {% if error %}
+    <div
+        style="color: red; margin-bottom: 15px; padding: 10px; border: 1px solid red; border-radius: 4px; background-color: #ffe6e6;">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
     <form action="login" method="post">
         <h2>Login</h2>
         <label for="username">Username</label><br>
