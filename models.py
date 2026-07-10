@@ -102,6 +102,11 @@ class StaffProfile(db.Model):
         default='Pending'
     )
 
+    is_blacklisted = db.Column(
+        db.Boolean,
+        default=False
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.now

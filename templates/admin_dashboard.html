@@ -2,40 +2,66 @@
 
 {% block title %}Admin Dashboard{% endblock title %}
 
-<a href="/admin/dashboard/treks"
-
 {% block content %}
+
+<h1>
+    <center>🛡️Administrator Portal
+</h1>
+
 <div class="button">
-    <a href="/admin/dashboard/treks" class="button">🏔️ Manage Treks</a>
+    <a href="{{ url_for('add_trek') }}" class="button">🚠Manage Treks</a>
     <a href="/admin/dashboard/staffs" class="button">👥 Manage Staffs</a>
     <a href="/admin/users" class="button">👤 Manage Users</a>
 
 </div>
 
- <div class="table">
+<div class="stats">
+    <div class="card">
+        <h1>Total Treks</h1>
+        <p>{{ total_treks }}</p>
+    </div>
 
-    <table border="1">
-        <tr>
-            <th>Booking ID</th>
-            <th>User ID</th>
-            <th>Trek ID</th>
-            <th>Booking Date</th>
-            <th>Status</th>
-        </tr>
+    <div class="card">
+        <h1>Total Users</h1>
+        <p> {{ total_users }}</p>
+    </div>
 
-        {% for active in active_bookings %}
-        <tr>
-            <td>{{ active.booking_id }}</td>
-            <td>{{ active.user_id }}</td>
-            <td>{{ active.trek_id }}</td>
-            <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
-            <td>{{ active.status }}</td>
-        </tr>
-        {% endfor %}
+    <div class="card">
+        <h1>Total Staffs</h1>
+        <p> {{ total_staffs }}</p>
+    </div>
 
-        
+    <div class="card">
+        <h1>Total Bookings</h1>
+        <p> {{ total_bookings }} </p>
+    </div>
 
-    </table>
+    <hr>
 
-</div>
-{% endblock content %}
+    <div class="table">
+
+        <table border="1">
+            <tr>
+                <th>Booking ID</th>
+                <th>User ID</th>
+                <th>Trek ID</th>
+                <th>Booking Date</th>
+                <th>Status</th>
+            </tr>
+
+            {% for active in active_bookings %}
+            <tr>
+                <td>{{ active.booking_id }}</td>
+                <td>{{ active.user_id }}</td>
+                <td>{{ active.trek_id }}</td>
+                <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
+                <td>{{ active.status }}</td>
+            </tr>
+            {% endfor %}
+
+
+
+        </table>
+
+    </div>
+    {% endblock content %}

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
-from models import db, Users, Trek, StaffProfile, Booking
+from models import db, Users, Trek, StaffProfile, UserProfile, Booking
 
 
 app = Flask(__name__)
@@ -21,7 +21,7 @@ def home():
 @app.route('/login', methods=["GET", "POST"])
 def login_validation():
     
-    if request.form == "GET":
+    if request.method == "GET":
         return render_template("login.html")
   
     
@@ -42,17 +42,17 @@ def login_validation():
     if user.role != role:
         return render_template('login.html', error="Incorrect role selected")
 
-    elif user.role == 'admin':
+    if user.role == 'admin':
         return redirect (f'/admin/dashboard/{user.username}')
     elif user.role == "TrekkStaff":
-        staff = StaffProfile.query.filter_by(staff_id=user.user_id)
+        staff = StaffProfile.query.filter_by(staff_id=user.user_id).first()
         
         #---------------Staff---------------
         
         if not staff:
             return "Staff profile not found"
         else:
-            return render_template(f"/staff/dashboard/{user.username}")
+            return redirect(f"/staff/dashboard/{user.username}")
         
         #---------------User---------------
         
@@ -126,40 +126,50 @@ def admin_dashboard(username):
 def view_treks():
     treks = Trek.query.all()  
     
-    return render_template('trek.html', treks=treks)
+    return render_template('trek_users.html', treks=treks)
 
 @app.route('/admin/assign-trek/<int:staff_id>/<int:trek_id>')
 def assign_trek(staff_id, trek_id):
 
     staff = StaffProfile.query.get_or_404(staff_id)
+    trek = Trek.query.get_or_404(trek_id)
 
-    trek = Trek.query.get(
-    int(staff.assigned_treks)
-)
+    trek.staff_id = staff.staff_id
     
     db.session.commit()
 
-    return redirect(request.referrer)
+    return redirect(request.referrer or url_for('view_treks'))
 
 # Add Trek
 
 @app.route('/admin/trek/add', methods=['GET', 'POST'])
 def add_trek():
-    if 'user.id' not in session or session.get('role')!= 'admin':
-        return redirect(url_for('login_validation'))
-    
     if request.method == 'POST':
-        trek_name=request.form.get('trek_name'),
-        location=request.form.get('location'),
-        difficulty=request.form.get('difficulty'),
-        available_slots=request.form.get('available_slots'),
-        staff_id=request.form.get('staff_id')
-        start_date=datetime.striptime(request.form.get('start_date'), '%Y-%m-%d').date(),
-        end_date=datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+        trek_name = request.form.get('trek_name')
+        location = request.form.get('location')
+        difficulty = request.form.get('difficulty')
+        available_slots = request.form.get('available_slots')
+        staff_id = request.form.get('staff_id')
+        start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+        
+        new_trek = Trek(
+            trek_name=trek_name,
+            location=location,
+            difficulty=difficulty,
+            available_slots=available_slots,
+            staff_id=staff_id if staff_id else None,
+            start_date=start_date,
+            end_date=end_date,
+            status='Pending'
+        )
+        db.session.add(new_trek)
+        db.session.commit()
+        return redirect(url_for('view_treks'))
     
     if request.method == 'GET':
-    
-        return render_template('trek_form.html', staffs=approve_staff)       
+        staffs = StaffProfile.query.filter_by(approval_status='Approved').all()
+        return render_template('trek_form.html', staffs=staffs)       
      
 # Edit trek
 @app.route('/admin/dashboard/edit/<int:trek_id>', methods=['GET', 'POST'])
@@ -220,10 +230,10 @@ def approve_trek(trek_id):
 def approve_staff(staff_id):
     
     staff = StaffProfile.query.get_or_404(staff_id)
-    staff.approve_status = "Pending"
+    staff.approval_status = "Approved"
     db.session.commit()
     
-    return redirect(request.refferer)
+    return redirect(request.referrer or '/admin/dashboard/treks')
 
 @app.route('/admin/staff/blacklist/<int:staff_id>')
 def blacklist_staff(staff_id):
@@ -251,8 +261,6 @@ def staff_dashboard(username):
         methods=['POST'])
 def update_trek(trek_id):
 
-    if not user:
-            return redirect('/login')
     trek = Trek.query.get_or_404(trek_id)
 
     trek.available_slots = request.form.get(
@@ -270,9 +278,14 @@ def update_trek(trek_id):
 @app.route('/staff/trek/<int:trek_id>/users')
 def trek_users(trek_id):
 
-    bookings = Booking.query.filter_by(
-        trek_id=trek_id
-    ).all()
+    bookings = db.session.query(
+        Booking.booking_id,
+        UserProfile.name.label('user_name'),
+        UserProfile.contact_details,
+        Booking.booking_date,
+        Booking.status
+    ).join(UserProfile, Booking.user_id == UserProfile.user_id)\
+     .filter(Booking.trek_id == trek_id).all()
 
     return render_template(
         'trek_users.html',
@@ -297,15 +310,50 @@ def update_slots(trek_id):
 # ================User Trekker================
 @app.route("/user/dashboard/<user_id>")
 def user_dashboard(user_id):
-    trek = Trek.query.all()
-    booking = Booking.query.filter_by(user_id = user_id)
+    treks = Trek.query.all()
+    bookings = db.session.query(
+        Booking.booking_id,
+        Trek.trek_name,
+        Booking.booking_date,
+        Booking.status
+    ).join(Trek, Booking.trek_id == Trek.trek_id)\
+     .filter(Booking.user_id == user_id).all()
+     
     user = Users.query.filter_by(id= user_id).first()
     return render_template(
         "user_dashboard.html",
-        treks=trek,
-        bookings=booking,
+        treks=treks,
+        bookings=bookings,
         user_id=user_id
     )
+
+@app.route('/user/book/<int:trek_id>', methods=['POST'])
+def book_trek(trek_id):
+    user_id = request.form.get('user_id')
+    trek = Trek.query.get_or_404(trek_id)
+    
+    if trek.status != 'Open':
+        return "Trek is not open for booking", 400
+        
+    if trek.available_slots <= 0:
+        return "No available slots", 400
+        
+    existing_booking = Booking.query.filter_by(user_id=user_id, trek_id=trek_id).first()
+    if existing_booking:
+        return "Already booked", 400
+        
+    new_booking = Booking(
+        user_id=user_id,
+        trek_id=trek_id,
+        status='Booked'
+    )
+    
+    trek.available_slots -= 1
+    
+    db.session.add(new_booking)
+    db.session.commit()
+    
+    return redirect(url_for('user_dashboard', user_id=user_id))
 
     
 if __name__ == "__main__":
