@@ -149,10 +149,14 @@ def admin_dashboard(username):
     )
 
 @app.route("/admin/dashboard/treks")
-def view_treks():
-    treks = Trek.query.all()  
-    
-    return render_template('trek_users.html', treks=treks)
+def manage_treks():
+    search_query = request.args.get('search', '')
+
+    if search_query:
+        treks = Trek.query.filter(Trek.trek_name.ilike(f'%{search_query}%')).all()
+    else:
+        treks = Trek.query.all()
+    return render_template('manage_treks.html', treks=treks)
 
 @app.route('/admin/assign-trek/<int:staff_id>/<int:trek_id>')
 def assign_trek(staff_id, trek_id):
@@ -354,7 +358,7 @@ def trek_users(trek_id):
 @app.route('/staff/update_slots/<int:trek_id>',
            methods=['POST'])
 def update_slots(trek_id):
-
+ 
     trek = Trek.query.get_or_404(trek_id)
 
     trek.available_slots = request.form.get(

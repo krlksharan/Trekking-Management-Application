@@ -7,6 +7,15 @@
 <a href="/admin/dashboard/admin" class="button">Back to Dashboard</a>
 <hr>
 
+<form method="GET" style="margin-bottom: 20px;">
+    <input type="text" name="search" placeholder="Search users by name..." value="{{ request.args.get('search', '') }}" style="padding: 5px; width: 250px;">
+    <button type="submit" style="padding: 5px 10px;">Search</button>
+    {% if request.args.get('search') %}
+        <a href="{{ request.path }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
+    {% endif %}
+</form>
+{% set query = request.args.get('search', '').lower() %}
+
 <div class="table">
     <table border="1">
         <tr>
@@ -18,6 +27,7 @@
             <th>Actions</th>
         </tr>
         {% for user in users %}
+        {% if not query or query in user.name.lower() %}
         <tr>
             <td>{{ user.user_id }}</td>
             <td>{{ user.name }}</td>
@@ -33,6 +43,7 @@
                 {% endif %}
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </table>
 </div>

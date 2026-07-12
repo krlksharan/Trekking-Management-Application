@@ -32,7 +32,16 @@ Welcome, {{ username }}
 </table>
 
 <h2>Assigned Treks</h2>
+<form method="GET" style="margin-bottom: 20px;">
+    <input type="text" name="search" placeholder="Search assigned treks..." value="{{ request.args.get('search', '') }}" style="padding: 5px; width: 250px;">
+    <button type="submit" style="padding: 5px 10px;">Search</button>
+    {% if request.args.get('search') %}
+        <a href="{{ request.path }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
+    {% endif %}
+</form>
+{% set query = request.args.get('search', '').lower() %}
 {% for trek in treks %}
+{% if not query or query in trek.trek_name.lower() or query in trek.location.lower() %}
 <form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post">
     <h3>{{ trek.trek_name }}</h3>
     <p>Location: {{ trek.location }}</p>
@@ -55,6 +64,7 @@ Welcome, {{ username }}
             Participants</a>
     </div>
 </form>
+{% endif %}
 {% endfor %}
 
 {% endblock content %}
