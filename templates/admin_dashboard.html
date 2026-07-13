@@ -35,33 +35,40 @@
         <h1>Total Bookings</h1>
         <p> {{ total_bookings }} </p>
     </div>
+</div>
 
-    <hr>
+<div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+    <h2>Trek Registration Statistics</h2>
+    <img src="{{ plot_url }}" alt="Trek Statistics Graph"
+        style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1);">
+</div>
 
-    <div class="table">
+<hr>
 
-        <table border="1">
-            <tr>
-                <th>Booking ID</th>
-                <th>User ID</th>
-                <th>Trek ID</th>
-                <th>Booking Date</th>
-                <th>Status</th>
-            </tr>
+<div class="table">
 
-            {% for active in active_bookings %}
-            <tr>
-                <td>{{ active.booking_id }}</td>
-                <td>{{ active.user_id }}</td>
-                <td>{{ active.trek_id }}</td>
-                <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
-                <td>{{ active.status }}</td>
-            </tr>
-            {% endfor %}
+    <table border="1">
+        <tr>
+            <th>Booking ID</th>
+            <th>User ID</th>
+            <th>Trek ID</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+        </tr>
+
+        {% for active in active_bookings %}
+        <tr>
+            <td>{{ active.booking_id }}</td>
+            <td>{{ active.user_id }}</td>
+            <td>{{ active.trek_id }}</td>
+            <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
+            <td>{{ active.status }}</td>
+        </tr>
+        {% endfor %}
 
 
 
-        </table>
+    </table>
 
-    </div>
-    {% endblock content %}
+</div>
+{% endblock content %}

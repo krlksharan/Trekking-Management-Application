@@ -4,14 +4,15 @@
 
 {% block content %}
 <h1>Manage Staff</h1>
-<a href="/admin/dashboard/admin" class="button">Back to Dashboard</a>
+<a href="javascript:history.back()" class="button">Back to Dashboard</a>
 <hr>
 
 <form method="GET" style="margin-bottom: 20px;">
-    <input type="text" name="search" placeholder="Search staff by name..." value="{{ request.args.get('search', '') }}" style="padding: 5px; width: 250px;">
+    <input type="text" name="search" placeholder="Search staff by name..." value="{{ request.args.get('search', '') }}"
+        style="padding: 5px; width: 250px;">
     <button type="submit" style="padding: 5px 10px;">Search</button>
     {% if request.args.get('search') %}
-        <a href="{{ request.path }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
+    <a href="{{ request.path }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
     {% endif %}
 </form>
 {% set query = request.args.get('search', '').lower() %}
@@ -38,12 +39,12 @@
                 {% if staff.approval_status == 'Pending' %}
                 <a href="{{ url_for('approve_staff', staff_id=staff.staff_id) }}">Approve</a>
                 {% endif %}
-                
+
                 {% if not staff.is_blacklisted %}
                 {% if staff.approval_status == 'Pending' %} | {% endif %}
                 <a href="{{ url_for('blacklist_staff', staff_id=staff.staff_id) }}" style="color: red;">Blacklist</a>
                 {% else %}
-                <span style="color: gray;">Blacklisted</span> | 
+                <span style="color: gray;">Blacklisted</span> |
                 <a href="{{ url_for('unblacklist_staff', staff_id=staff.staff_id) }}" style="color: green;">Approve</a>
                 {% endif %}
             </td>

@@ -4,61 +4,45 @@
 
 <h1>
     {% if trek %}
-        Edit Trek
+    Edit Trek
     {% else %}
-        Add Trek
+    Add Trek
     {% endif %}
 </h1>
 
 <form method="POST">
 
-    <label>Trek Name</label><br>
-    <input type="text"
-           name="trek_name"
-           value="{{ trek.trek_name if trek else '' }}"
-           required><br><br>
+    <label>Trek Name</label>
+    <input type="text" name="trek_name" value="{{ trek.trek_name if trek else '' }}" required>
 
-    <label>Location</label><br>
-    <input type="text"
-           name="location"
-           value="{{ trek.location if trek else '' }}"
-           required><br><br>
+    <label>Location</label>
+    <input type="text" name="location" value="{{ trek.location if trek else '' }}" required>
 
-    <label>Difficulty</label><br>
+    <label>Difficulty</label>
     <select name="difficulty" required>
         <option value="Easy">Easy</option>
         <option value="Moderate">Moderate</option>
         <option value="Hard">Hard</option>
-    </select><br><br>
+    </select>
 
-    <label>Available Slots</label><br>
-    <input type="number"
-           name="available_slots"
-           value="{{ trek.available_slots if trek else '' }}"
-           required><br><br>
+    <label>Available Slots</label>
+    <input type="number" name="available_slots" value="{{ trek.available_slots if trek else '' }}" required>
 
-    <label>Assign Staff (Optional)</label><br>
+    <label>Assign Staff (Optional)</label>
     <select name="staff_id">
         <option value="">-- No Staff Assigned --</option>
         {% for staff in staffs %}
-            <option value="{{ staff.staff_id }}" 
-                {% if trek and trek.staff_id == staff.staff_id %}selected{% endif %}>
-                {{ staff.name }}
-            </option>
+        <option value="{{ staff.staff_id }}" {% if trek and trek.staff_id==staff.staff_id %}selected{% endif %}>
+            {{ staff.name }}
+        </option>
         {% endfor %}
-    </select><br><br>
+    </select>
 
-    <label>Start Date</label><br>
-    <input type="date"
-           name="start_date"
-           value="{{ trek.start_date if trek else '' }}"
-           required><br><br>
+    <label>Start Date</label>
+    <input type="date" name="start_date" value="{{ trek.start_date if trek else '' }}" required>
 
-    <label>End Date</label><br>
-    <input type="date"
-           name="end_date"
-           value="{{ trek.end_date if trek else '' }}"
-           required><br><br>
+    <label>End Date</label>
+    <input type="date" name="end_date" value="{{ trek.end_date if trek else '' }}" required>
 
     <button type="submit">
         Save Trek

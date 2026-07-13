@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %} WalkJog: The Trekking Management System {% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.1">
 </head>
+
 <body>
   <nav>
-    <a href="/">Home</a>
     <a href="/login">Login</a>
     <a href="/register">Register</a>
   </nav>
   {% block content %}
   {% endblock %}
 
-  <footer style="text-align: center; padding: 20px 0; margin-top: auto; color: var(--text-secondary); font-size: 0.875rem; border-top: 1px solid var(--border-color); width: 100%; background-color: var(--surface-color); z-index: 100;">
+  <footer
+    style="text-align: center; padding: 20px 0; margin-top: auto; color: var(--text-secondary); font-size: 0.875rem; border-top: 1px solid var(--border-color); width: 100%; background-color: var(--surface-color); z-index: 100;">
     &copy; 2026 WalkJog Trekking Management System. All rights reserved.
   </footer>
 </body>
+
 </html>

@@ -10,36 +10,51 @@ Welcome
 
 <div>
     <h1>Available Open Treks</h1>
-    
-    <form method="GET" action="/user/dashboard/{{ user_id }}" style="display: flex; gap: 10px; align-items: center; max-width: 500px; margin-bottom: 25px;">
-        <input type="text" name="search" placeholder="Search treks..." style="flex: 1; margin-bottom: 0;">
-        <button type="submit" class="cut-corner-btn" style="width: auto; margin-bottom: 0;">Search</button>
+
+    <form method="GET" action="/user/dashboard/{{ user_id }}"
+        style="display: flex; gap: 10px; align-items: center; max-width: 800px; margin-bottom: 25px; flex-wrap: wrap;">
+        <input type="text" name="search" placeholder="Search treks..." value="{{ request.args.get('search', '') }}"
+            style="flex: 1; margin-bottom: 0;">
+        <select name="difficulty" style="margin-bottom: 0; padding: 5px;">
+            <option value="">Any Difficulty</option>
+            <option value="Easy" {% if request.args.get('difficulty')=='Easy' %}selected{% endif %}>Easy</option>
+            <option value="Moderate" {% if request.args.get('difficulty')=='Moderate' %}selected{% endif %}>Moderate
+            </option>
+            <option value="Hard" {% if request.args.get('difficulty')=='Hard' %}selected{% endif %}>Hard</option>
+        </select>
+        <input type="text" name="location" placeholder="Location..." value="{{ request.args.get('location', '') }}"
+            style="flex: 1; margin-bottom: 0;">
+        <button type="submit" class="cut-corner-btn"
+            style="width: auto; margin-bottom: 0; padding: 5px 10px;">Search</button>
+        {% if request.args.get('search') or request.args.get('difficulty') or request.args.get('location') %}
+        <a href="/user/dashboard/{{ user_id }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
+        {% endif %}
     </form>
     <table border="1">
-    <tr>
-        <th>Trek ID</th>
-        <th>Trek Name</th>
-        <th>Location</th>
-        <th>Start Date</th>
-        <th>Action</th>
-    </tr>
-    {% for trek in treks %}
-    <tr>
-        <td>{{ trek.trek_id }}</td>
-        <td>{{ trek.trek_name }}</td>
-        <td>{{ trek.location }}</td>
-        <td>{{ trek.start_date }}</td>
-        <td>
-            <form action="{{ url_for('book_trek', trek_id=trek.trek_id) }}" method="POST">
-                <input type="hidden" name="user_id" value="{{ user_id }}">
-                <button type="submit" {% if trek.available_slots <= 0 %}disabled{% endif %}>
-                    {% if trek.available_slots > 0 %}Book Spot{% else %}Full{% endif %}
-                </button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        <tr>
+            <th>Trek ID</th>
+            <th>Trek Name</th>
+            <th>Location</th>
+            <th>Start Date</th>
+            <th>Action</th>
+        </tr>
+        {% for trek in treks %}
+        <tr>
+            <td>{{ trek.trek_id }}</td>
+            <td>{{ trek.trek_name }}</td>
+            <td>{{ trek.location }}</td>
+            <td>{{ trek.start_date }}</td>
+            <td>
+                <form action="{{ url_for('book_trek', trek_id=trek.trek_id) }}" method="POST">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <button type="submit" {% if trek.available_slots <=0 %}disabled{% endif %}>
+                        {% if trek.available_slots > 0 %}Book Spot{% else %}Full{% endif %}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
 
 </div>
@@ -52,20 +67,20 @@ Welcome
     </h1>
     <table border="1">
         <tr>
-        <th>
-            Booking ID
-        </th>
-        <th>
-            Trek Name
-        </th>
-        <th>
-            Booking Date
-        </th>
-        <th>
-            Booking Status
-        </th>
+            <th>
+                Booking ID
+            </th>
+            <th>
+                Trek Name
+            </th>
+            <th>
+                Booking Date
+            </th>
+            <th>
+                Booking Status
+            </th>
         </tr>
-        
+
         {% for booking in bookings %}
         <tr>
             <td>{{ booking.booking_id }}</td>
@@ -79,4 +94,3 @@ Welcome
 
 
 {% endblock %}
-

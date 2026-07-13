@@ -2,3 +2,4 @@ Flask
 Jinja2
 SqlAlchemy
 Flask-Login
+matplotlib

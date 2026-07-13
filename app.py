@@ -4,6 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 from models import db, Users, Trek, StaffProfile, UserProfile, Booking
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import io # Create temprory memory space in the server for storing the plot image
+import base64 # Encode the plot image in base64 to embed it in HTML
 
 
 app = Flask(__name__)
@@ -11,11 +16,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///trekking.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+with app.app_context():
+    db.create_all()
 
-     
 @app.route('/')
 def home():
-    return render_template('login.html')
+    return redirect(url_for('login_validation'))
 
 # ================Login Validation================
 @app.route('/login', methods=["GET", "POST"])
@@ -88,33 +94,40 @@ def registration():
     if exists:
         return render_template('register.html', error="Username already exists")
 
+    if selected_role == 'TrekkStaff':
+        if StaffProfile.query.filter_by(name=name).first():
+            return render_template('register.html', error="Staff name already exists")
+
     new_account = Users(
         username=username,
         password=hashed_pass,
         role=selected_role
     )
    
-    db.session.add(new_account)
-    db.session.commit()
-    
-    if selected_role == 'TrekkStaff':
-        new_staff = StaffProfile(
-            staff_id=new_account.id,
-            name=name,
-            contact_details=contact_details
-        )
-        db.session.add(new_staff)
-        db.session.commit()
-    elif selected_role == 'User(Trekker)':
-        new_user = UserProfile(
-            user_id=new_account.id,
-            name=name,
-            contact_details=contact_details
-        )
-        db.session.add(new_user)
-        db.session.commit()
+    try:
+        db.session.add(new_account)
+        db.session.flush()
+        
+        if selected_role == 'TrekkStaff':
+            new_staff = StaffProfile(
+                staff_id=new_account.id,
+                name=name,
+                contact_details=contact_details
+            )
+            db.session.add(new_staff)
+        elif selected_role == 'User(Trekker)':
+            new_user = UserProfile(
+                user_id=new_account.id,
+                name=name,
+                contact_details=contact_details
+            )
+            db.session.add(new_user)
 
-    return render_template('register.html', success="Registration Successful")
+        db.session.commit()
+        return render_template('register.html', success="Registration Successful")
+    except Exception as e:
+        db.session.rollback()
+        return render_template('register.html', error="Registration failed. Please check your details or try a different name.")
 
 #================Admin Dashboard================
 @app.route("/admin/dashboard/<username>")
@@ -135,6 +148,23 @@ def admin_dashboard(username):
     trek_labels = [item[0] for item in bookings_by_trek]
     booking_counts = [item[1] for item in bookings_by_trek]
 
+    # Generate the Matplotlib graph
+    plt.figure(figsize=(8, 5))
+    plt.bar(trek_labels, booking_counts, color='#4CAF50')
+    plt.xlabel('Trek Name')
+    plt.ylabel('Number of Registered Users')
+    plt.title('Users Registered per Trek')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    plt.close()
+    
+    # Encode the image in base64 to embed it in HTML
+    plot_data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    plot_url = f"data:image/png;base64,{plot_data}"
 
     return render_template(
         'admin_dashboard.html',
@@ -144,8 +174,7 @@ def admin_dashboard(username):
         total_staffs=total_staffs,
         total_bookings=total_bookings,
         active_bookings=active_bookings,
-        trek_labels=trek_labels,
-        booking_count=booking_counts
+        plot_url=plot_url
     )
 
 @app.route("/admin/dashboard/treks")
@@ -168,7 +197,7 @@ def assign_trek(staff_id, trek_id):
     
     db.session.commit()
 
-    return redirect(request.referrer or url_for('view_treks'))
+    return redirect(request.referrer or url_for('manage_treks'))
 
 # Add Trek
 
@@ -195,7 +224,7 @@ def add_trek():
         )
         db.session.add(new_trek)
         db.session.commit()
-        return redirect(url_for('view_treks'))
+        return redirect(url_for('manage_treks'))
     
     if request.method == 'GET':
         staffs = StaffProfile.query.filter_by(approval_status='Approved').all()
@@ -208,15 +237,20 @@ def edit_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
 
     if request.method == 'GET':
+        staffs = StaffProfile.query.filter_by(approval_status='Approved').all()
         return render_template(
             'trek_form.html',
-            trek=trek
+            trek=trek,
+            staffs=staffs
         )
 
     trek.trek_name = request.form.get('trek_name')
     trek.location = request.form.get('location')
     trek.difficulty = request.form.get('difficulty')
     trek.available_slots = request.form.get('available_slots')
+    
+    staff_id = request.form.get('staff_id')
+    trek.staff_id = staff_id if staff_id else None
 
     trek.start_date = datetime.strptime(
         request.form.get('start_date'),
@@ -230,7 +264,7 @@ def edit_trek(trek_id):
 
     db.session.commit()
 
-    return redirect(url_for('view_treks'))
+    return redirect(url_for('manage_treks'))
 # Delete Trek
 
 @app.route('/admin/dashboard/delete/<int:trek_id>')
@@ -252,7 +286,7 @@ def approve_trek(trek_id):
     trek.status = 'Approved'
     db.session.commit()
     
-    return redirect(url_for("view_treks"))
+    return redirect(url_for("manage_treks"))
 
 # Approve Staff
 
@@ -371,7 +405,20 @@ def update_slots(trek_id):
 # ================User Trekker================
 @app.route("/user/dashboard/<user_id>")
 def user_dashboard(user_id):
-    treks = Trek.query.all()
+    query = Trek.query.filter(Trek.status.in_(['Approved', 'Open']))
+    
+    search_term = request.args.get('search')
+    difficulty = request.args.get('difficulty')
+    location = request.args.get('location')
+
+    if search_term:
+        query = query.filter(Trek.trek_name.ilike(f"%{search_term}%"))
+    if difficulty:
+        query = query.filter(Trek.difficulty == difficulty)
+    if location:
+        query = query.filter(Trek.location.ilike(f"%{location}%"))
+        
+    treks = query.all()
     bookings = db.session.query(
         Booking.booking_id,
         Trek.trek_name,
