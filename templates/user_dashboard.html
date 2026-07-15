@@ -6,90 +6,109 @@ User Dashboard
 
 {% block content %}
 
-Welcome
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Welcome to your Dashboard</h1>
+    <a href="{{ url_for('edit_user_profile', user_id=user_id) }}" class="btn btn-outline-secondary">Edit Profile</a>
+</div>
 
-<div>
-    <h1>Available Open Treks</h1>
+<div class="mb-5">
+    <h2 class="mb-3">Available Open Treks</h2>
 
-    <form method="GET" action="/user/dashboard/{{ user_id }}"
-        style="display: flex; gap: 10px; align-items: center; max-width: 800px; margin-bottom: 25px; flex-wrap: wrap;">
-        <input type="text" name="search" placeholder="Search treks..." value="{{ request.args.get('search', '') }}"
-            style="flex: 1; margin-bottom: 0;">
-        <select name="difficulty" style="margin-bottom: 0; padding: 5px;">
-            <option value="">Any Difficulty</option>
-            <option value="Easy" {% if request.args.get('difficulty')=='Easy' %}selected{% endif %}>Easy</option>
-            <option value="Moderate" {% if request.args.get('difficulty')=='Moderate' %}selected{% endif %}>Moderate
-            </option>
-            <option value="Hard" {% if request.args.get('difficulty')=='Hard' %}selected{% endif %}>Hard</option>
-        </select>
-        <input type="text" name="location" placeholder="Location..." value="{{ request.args.get('location', '') }}"
-            style="flex: 1; margin-bottom: 0;">
-        <button type="submit" class="cut-corner-btn"
-            style="width: auto; margin-bottom: 0; padding: 5px 10px;">Search</button>
-        {% if request.args.get('search') or request.args.get('difficulty') or request.args.get('location') %}
-        <a href="/user/dashboard/{{ user_id }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
-        {% endif %}
+    <form method="GET" action="/user/dashboard/{{ user_id }}" class="row g-2 mb-4 align-items-center">
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="search" placeholder="Search treks..." value="{{ request.args.get('search', '') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="difficulty" class="form-select">
+                <option value="">Any Difficulty</option>
+                <option value="Easy" {% if request.args.get('difficulty')=='Easy' %}selected{% endif %}>Easy</option>
+                <option value="Moderate" {% if request.args.get('difficulty')=='Moderate' %}selected{% endif %}>Moderate</option>
+                <option value="Hard" {% if request.args.get('difficulty')=='Hard' %}selected{% endif %}>Hard</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="location" placeholder="Location..." value="{{ request.args.get('location', '') }}">
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if request.args.get('search') or request.args.get('difficulty') or request.args.get('location') %}
+            <a href="/user/dashboard/{{ user_id }}" class="btn btn-outline-danger ms-2">Clear</a>
+            {% endif %}
+        </div>
     </form>
-    <table border="1">
+    <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
         <tr>
             <th>Trek ID</th>
             <th>Trek Name</th>
             <th>Location</th>
+            <th>Duration</th>
             <th>Start Date</th>
             <th>Action</th>
         </tr>
+        </thead>
+        <tbody>
         {% for trek in treks %}
         <tr>
             <td>{{ trek.trek_id }}</td>
             <td>{{ trek.trek_name }}</td>
             <td>{{ trek.location }}</td>
+            <td>{{ trek.duration }} days</td>
             <td>{{ trek.start_date }}</td>
             <td>
-                <form action="{{ url_for('book_trek', trek_id=trek.trek_id) }}" method="POST">
+                <form action="{{ url_for('book_trek', trek_id=trek.trek_id) }}" method="POST" class="d-inline">
                     <input type="hidden" name="user_id" value="{{ user_id }}">
-                    <button type="submit" {% if trek.available_slots <=0 %}disabled{% endif %}>
+                    <button type="submit" class="btn btn-sm btn-success" {% if trek.available_slots <=0 %}disabled{% endif %}>
                         {% if trek.available_slots > 0 %}Book Spot{% else %}Full{% endif %}
                     </button>
                 </form>
             </td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
-
-
+    </div>
 </div>
 
 <hr>
 
-<div>
-    <h1>
-        Your Booking History
-    </h1>
-    <table border="1">
+<div class="mb-5">
+    <h2 class="mb-3">Your Booking History</h2>
+    <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
         <tr>
-            <th>
-                Booking ID
-            </th>
-            <th>
-                Trek Name
-            </th>
-            <th>
-                Booking Date
-            </th>
-            <th>
-                Booking Status
-            </th>
+            <th>Booking ID</th>
+            <th>Trek Name</th>
+            <th>Booking Date</th>
+            <th>Booking Status</th>
+            <th>Action</th>
         </tr>
-
+        </thead>
+        <tbody>
         {% for booking in bookings %}
         <tr>
             <td>{{ booking.booking_id }}</td>
             <td>{{ booking.trek_name }}</td>
-            <td>{{ booking.booking_date}}
-            <td>{{ booking.status }}</td>
+            <td>{{ booking.booking_date.strftime('%Y-%m-%d') if booking.booking_date else '' }}</td>
+            <td>
+                <span class="badge {% if booking.status == 'Booked' %}bg-primary{% elif booking.status == 'Cancelled' %}bg-danger{% elif booking.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ booking.status }}
+                </span>
+            </td>
+            <td>
+                {% if booking.status == 'Booked' %}
+                <form action="{{ url_for('cancel_booking', booking_id=booking.booking_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                </form>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
+    </div>
 </div>
 
 

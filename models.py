@@ -48,6 +48,11 @@ class Trek(db.Model):
         nullable=False
     )
 
+    duration = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
     status = db.Column(
         db.String(20),
         default='Pending'

@@ -6,18 +6,22 @@ Staff Dashboard {{ username }}
 
 {% block content %}
 
-Welcome, {{ username }}
+<h1 class="mb-4">Welcome, {{ username }}</h1>
 
-<h2>Staff Profile</h2>
-<table border="1px">
-    <tr>
-        <td>Staff ID</td>
-        <td>Name</td>
-        <td>Contact Details</td>
-        <td>Assigned Treks</td>
-        <td>Status</td>
-        <td>Created At</td>
-    </tr>
+<h2 class="mb-3">Staff Profile</h2>
+<div class="table-responsive mb-5">
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Staff ID</th>
+            <th>Name</th>
+            <th>Contact Details</th>
+            <th>Assigned Treks</th>
+            <th>Status</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
 
     {% for staff in staffs %}
     <tr>
@@ -29,41 +33,50 @@ Welcome, {{ username }}
         <td>{{ staff.created_at }}</td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
+</div>
 
-<h2>Assigned Treks</h2>
-<form method="GET" style="margin-bottom: 20px;">
-    <input type="text" name="search" placeholder="Search assigned treks..." value="{{ request.args.get('search', '') }}"
-        style="padding: 5px; width: 250px;">
-    <button type="submit" style="padding: 5px 10px;">Search</button>
+<h2 class="mb-3">Assigned Treks</h2>
+<form method="GET" class="d-flex mb-4" style="max-width: 400px;">
+    <input class="form-control me-2" type="text" name="search" placeholder="Search assigned treks..." value="{{ request.args.get('search', '') }}">
+    <button class="btn btn-outline-success" type="submit">Search</button>
     {% if request.args.get('search') %}
-    <a href="{{ request.path }}" style="text-decoration: none; padding: 5px 10px; color: red;">Clear</a>
+    <a href="{{ request.path }}" class="btn btn-outline-danger ms-2">Clear</a>
     {% endif %}
 </form>
+<div class="row">
 {% set query = request.args.get('search', '').lower() %}
 {% for trek in treks %}
 {% if not query or query in trek.trek_name.lower() or query in trek.location.lower() %}
-<form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post" class="card">
-    <h3>{{ trek.trek_name }}</h3>
-    <p>Location: {{ trek.location }}</p>
+<div class="col-md-6 mb-4">
+    <form action="{{ url_for('update_trek', trek_id=trek.trek_id) }}" method="post" class="card p-4 shadow-sm h-100">
+        <input type="hidden" name="staff_id" value="{{ staffs[0].staff_id if staffs else staff_profiles[0].staff_id }}">
+        <h3 class="card-title">{{ trek.trek_name }}</h3>
+        <p class="card-text text-muted">Location: {{ trek.location }}</p>
 
-    <label>Available Slots</label>
-    <input type="number" name="available_slots" value="{{ trek.available_slots }}">
+        <div class="mb-3">
+            <label class="form-label">Available Slots</label>
+            <input type="number" class="form-control" name="available_slots" value="{{ trek.available_slots }}">
+        </div>
 
-    <label>Status</label>
-    <select name="status">
-        <option value="Open">Open</option>
-        <option value="Closed">Closed</option>
-    </select>
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="Open" {% if trek.status == 'Open' %}selected{% endif %}>Open</option>
+                <option value="Closed" {% if trek.status == 'Closed' %}selected{% endif %}>Closed</option>
+                <option value="Started" {% if trek.status == 'Started' %}selected{% endif %}>Started</option>
+                <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+        </div>
 
-    <div>
-        <button type="submit">Update Trek</button>
-        <a href="{{ url_for('trek_users', trek_id=trek.trek_id) }}" class="button"
-            style="text-decoration: none; padding: 5px 10px; background-color: #f0f0f0; color: black; border: 1px solid #ccc; border-radius: 3px; font-size: 14px;">View
-            Participants</a>
-    </div>
-</form>
+        <div class="mt-auto d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Update Trek</button>
+            <a href="{{ url_for('trek_users', trek_id=trek.trek_id) }}" class="btn btn-secondary">View Participants</a>
+        </div>
+    </form>
+</div>
 {% endif %}
 {% endfor %}
-
+</div>
 {% endblock content %}

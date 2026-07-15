@@ -4,71 +4,95 @@
 
 {% block content %}
 
-<h1>
-    <center>🛡️Administrator Portal
-</h1>
-
-<div class="button">
-    <a href="{{ url_for('manage_treks') }}" class="button">🚠Manage Treks</a>
-    <a href="{{ url_for('manage_staffs') }}" class="button">👥 Manage Staffs</a>
-    <a href="{{ url_for('manage_users') }}" class="button">👤 Manage Users</a>
-
-</div>
-
-<div class="stats">
-    <div class="card">
-        <h1>Total Treks</h1>
-        <p>{{ total_treks }}</p>
-    </div>
-
-    <div class="card">
-        <h1>Total Users</h1>
-        <p> {{ total_users }}</p>
-    </div>
-
-    <div class="card">
-        <h1>Total Staffs</h1>
-        <p> {{ total_staffs }}</p>
-    </div>
-
-    <div class="card">
-        <h1>Total Bookings</h1>
-        <p> {{ total_bookings }} </p>
+<div class="text-center mb-5 mt-4">
+    <h1 class="display-5 fw-bold"><span class="text-primary">🛡️</span> Administrator Portal</h1>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+        <a href="{{ url_for('manage_treks') }}" class="btn btn-primary shadow-sm px-4">🚠 Manage Treks</a>
+        <a href="{{ url_for('manage_staffs') }}" class="btn btn-info text-white shadow-sm px-4">👥 Manage Staffs</a>
+        <a href="{{ url_for('manage_users') }}" class="btn btn-success shadow-sm px-4">👤 Manage Users</a>
+        <a href="{{ url_for('admin_bookings') }}" class="btn btn-warning text-dark shadow-sm px-4">📅 View All
+            Bookings</a>
     </div>
 </div>
 
-<div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-    <h2>Trek Registration Statistics</h2>
-    <img src="{{ plot_url }}" alt="Trek Statistics Graph"
-        style="max-width: 100%; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1);">
+<div class="row text-center mb-5 g-4">
+    <div class="col-md-3">
+        <div class="card shadow border-0 h-100 bg-primary text-white rounded-4">
+            <div class="card-body d-flex flex-column justify-content-center py-4">
+                <h5 class="card-title mb-3 fw-light">Total Treks</h5>
+                <h2 class="display-4 fw-bold mb-0">{{ total_treks }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow border-0 h-100 bg-info text-white rounded-4">
+            <div class="card-body d-flex flex-column justify-content-center py-4">
+                <h5 class="card-title mb-3 fw-light">Total Users</h5>
+                <h2 class="display-4 fw-bold mb-0"> {{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow border-0 h-100 bg-success text-white rounded-4">
+            <div class="card-body d-flex flex-column justify-content-center py-4">
+                <h5 class="card-title mb-3 fw-light">Total Staffs</h5>
+                <h2 class="display-4 fw-bold mb-0"> {{ total_staffs }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow border-0 h-100 bg-warning text-dark rounded-4">
+            <div class="card-body d-flex flex-column justify-content-center py-4">
+                <h5 class="card-title mb-3 fw-light">Total Bookings</h5>
+                <h2 class="display-4 fw-bold mb-0"> {{ total_bookings }} </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-5">
+    <h3 class="mb-4 text-muted">Trek Registration Statistics</h3>
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mx-auto" style="max-width: 800px;">
+        <img src="{{ plot_url }}" alt="Trek Statistics Graph" class="img-fluid w-100">
+    </div>
 </div>
 
 <hr>
 
-<div class="table">
-
-    <table border="1">
-        <tr>
-            <th>Booking ID</th>
-            <th>User ID</th>
-            <th>Trek ID</th>
-            <th>Booking Date</th>
-            <th>Status</th>
-        </tr>
-
-        {% for active in active_bookings %}
-        <tr>
-            <td>{{ active.booking_id }}</td>
-            <td>{{ active.user_id }}</td>
-            <td>{{ active.trek_id }}</td>
-            <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
-            <td>{{ active.status }}</td>
-        </tr>
-        {% endfor %}
-
-
-
-    </table>
-
+<div class="card shadow-sm border-0 rounded-4 mb-5">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0 text-muted">Active Bookings</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Booking ID</th>
+                    <th>User ID</th>
+                    <th>Trek ID</th>
+                    <th>Booking Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for active in active_bookings %}
+                <tr>
+                    <td>#{{ active.booking_id }}</td>
+                    <td><span class="badge bg-secondary">User {{ active.user_id }}</span></td>
+                    <td><span class="badge bg-info text-dark">Trek {{ active.trek_id }}</span></td>
+                    <td>{{ active.booking_date.strftime('%Y-%m-%d %H:%M') if active.booking_date else '' }}</td>
+                    <td><span class="badge bg-success">{{ active.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No active bookings found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock content %}

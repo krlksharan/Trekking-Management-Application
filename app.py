@@ -7,7 +7,7 @@ from models import db, Users, Trek, StaffProfile, UserProfile, Booking
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import io # Create temprory memory space in the server for storing the plot image
+import io # memory space in the server for storing the plot image
 import base64 # Encode the plot image in base64 to embed it in HTML
 
 
@@ -148,7 +148,7 @@ def admin_dashboard(username):
     trek_labels = [item[0] for item in bookings_by_trek]
     booking_counts = [item[1] for item in bookings_by_trek]
 
-    # Generate the Matplotlib graph
+    # Matplotlib graph
     plt.figure(figsize=(8, 5))
     plt.bar(trek_labels, booking_counts, color='#4CAF50')
     plt.xlabel('Trek Name')
@@ -207,6 +207,7 @@ def add_trek():
         trek_name = request.form.get('trek_name')
         location = request.form.get('location')
         difficulty = request.form.get('difficulty')
+        duration = request.form.get('duration')
         available_slots = request.form.get('available_slots')
         staff_id = request.form.get('staff_id')
         start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
@@ -216,6 +217,7 @@ def add_trek():
             trek_name=trek_name,
             location=location,
             difficulty=difficulty,
+            duration=duration,
             available_slots=available_slots,
             staff_id=staff_id if staff_id else None,
             start_date=start_date,
@@ -247,6 +249,7 @@ def edit_trek(trek_id):
     trek.trek_name = request.form.get('trek_name')
     trek.location = request.form.get('location')
     trek.difficulty = request.form.get('difficulty')
+    trek.duration = request.form.get('duration')
     trek.available_slots = request.form.get('available_slots')
     
     staff_id = request.form.get('staff_id')
@@ -301,7 +304,11 @@ def approve_staff(staff_id):
 
 @app.route('/admin/staffs')
 def manage_staffs():
-    staffs = StaffProfile.query.all()
+    search_query = request.args.get('search', '')
+    if search_query:
+        staffs = StaffProfile.query.filter(StaffProfile.name.ilike(f'%{search_query}%') | (StaffProfile.staff_id == search_query if search_query.isdigit() else False)).all()
+    else:
+        staffs = StaffProfile.query.all()
     return render_template('manage_staffs.html', staffs=staffs)
 
 @app.route('/admin/staff/blacklist/<int:staff_id>')
@@ -316,7 +323,11 @@ def blacklist_staff(staff_id):
 
 @app.route('/admin/users')
 def manage_users():
-    users = UserProfile.query.all()
+    search_query = request.args.get('search', '')
+    if search_query:
+        users = UserProfile.query.filter(UserProfile.name.ilike(f'%{search_query}%') | (UserProfile.user_id == search_query if search_query.isdigit() else False)).all()
+    else:
+        users = UserProfile.query.all()
     return render_template('manage_users.html', users=users)
 
 @app.route('/admin/user/blacklist/<int:user_id>')
@@ -341,6 +352,19 @@ def unblacklist_user(user_id):
     db.session.commit()
     return redirect(url_for('manage_users'))
 
+@app.route('/admin/bookings')
+def admin_bookings():
+    bookings = db.session.query(
+        Booking.booking_id,
+        Booking.user_id,
+        UserProfile.name.label('user_name'),
+        Trek.trek_name,
+        Booking.booking_date,
+        Booking.status
+    ).join(UserProfile, Booking.user_id == UserProfile.user_id)\
+     .join(Trek, Booking.trek_id == Trek.trek_id).all()
+    return render_template('admin_bookings.html', bookings=bookings)
+
 # ================Staff Dashboard================
 @app.route("/staff/dashboard/<username>")
 def staff_dashboard(username):
@@ -357,6 +381,10 @@ def staff_dashboard(username):
 def update_trek(trek_id):
 
     trek = Trek.query.get_or_404(trek_id)
+    staff_id = request.form.get('staff_id')
+    
+    if str(trek.staff_id) != str(staff_id):
+        return "Unauthorized: You are not assigned to this trek", 403
 
     trek.available_slots = request.form.get(
         'available_slots'
@@ -462,6 +490,28 @@ def book_trek(trek_id):
     db.session.commit()
     
     return redirect(url_for('user_dashboard', user_id=user_id))
+
+@app.route('/user/booking/cancel/<int:booking_id>', methods=['POST'])
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    user_id = booking.user_id
+    if booking.status == 'Booked':
+        booking.status = 'Cancelled'
+        trek = Trek.query.get(booking.trek_id)
+        if trek:
+            trek.available_slots += 1
+        db.session.commit()
+    return redirect(url_for('user_dashboard', user_id=user_id))
+
+@app.route('/user/profile/edit/<int:user_id>', methods=['GET', 'POST'])
+def edit_user_profile(user_id):
+    user_prof = UserProfile.query.get_or_404(user_id)
+    if request.method == 'POST':
+        user_prof.name = request.form.get('name')
+        user_prof.contact_details = request.form.get('contact_details')
+        db.session.commit()
+        return redirect(url_for('user_dashboard', user_id=user_id))
+    return render_template('edit_user_profile.html', user_prof=user_prof)
 
     
 if __name__ == "__main__":

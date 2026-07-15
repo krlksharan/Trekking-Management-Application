@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}All Bookings - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">All Bookings</h1>
+    <a href="{{ url_for('admin_dashboard', username=session.get('username', 'admin')) }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+</div>
+
+<div class="table-responsive bg-white rounded-3 shadow-sm">
+    <table class="table table-hover table-striped mb-0 align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Booking ID</th>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Trek Name</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.booking_id }}</td>
+            <td>{{ booking.user_id }}</td>
+            <td>{{ booking.user_name }}</td>
+            <td>{{ booking.trek_name }}</td>
+            <td>{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') if booking.booking_date else '' }}</td>
+            <td>
+                <span class="badge {% if booking.status == 'Booked' %}bg-primary{% elif booking.status == 'Cancelled' %}bg-danger{% elif booking.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ booking.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -3,54 +3,59 @@
 {% block title %} Registration {% endblock title %}
 
 {% block content %}
-<h1>WalkJog: The Trekking Management System</h1>
-<h2>Register</h2>
+<div class="card shadow-sm mx-auto mt-5" style="max-width: 450px;">
+    <div class="card-body p-4">
+        
+    <h2 class="card-title text-center mb-4">Register</h2>
 
-<form action="register" method="post">
-    <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="ym496" required name="username">
+    {% if success %}
+    <div class="alert alert-success mb-3">
+        <strong>Success!</strong> {{ success }}
+        <div class="mt-2"><a href="{{ url_for('login_validation') }}" class="btn btn-sm btn-success">Login Now</a></div>
     </div>
-    <br>
-    <div>
-        <label for="name">Full Name</label>
-        <input type="text" id="name" placeholder="Yogendra" required name="name">
-    </div>
-    <br>
-    <div>
-        <label for="contact_details">Contact Details (Phone/Email)</label>
-        <input type="text" id="contact_details" placeholder="1234567890" required name="contact_details">
-    </div>
-    <br>
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required name="password">
-    </div>
-    <br>
-    <div>
-        <label for="role">Role</label>
-        <select name="role" id="role" required>
-            <option value="TrekkStaff">Trek Staff</option>
-            <option value="User(Trekker)">User(Trekker)</option>   
-        </select>
-    </div>
-    <br>
-    <button type="submit">Register</button>
-</form>
+    {% endif %}
 
-{% if success %}
-<div>
-    <h3>Success!</h3>
-    <p>{{ success }}</p>
-    <a href="{{ url_for('login_validation') }}">Login Now</a>
+    {% if error %}
+    <div class="alert alert-danger mb-3">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <form action="register" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="ym496" required name="username">
+        </div>
+        
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" placeholder="Yogendra" required name="name">
+        </div>
+        
+        <div class="mb-3">
+            <label for="contact_details" class="form-label">Contact Details (Phone/Email)</label>
+            <input type="text" class="form-control" id="contact_details" placeholder="1234567890" required name="contact_details">
+        </div>
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="••••••••" required name="password">
+        </div>
+        
+        <div class="mb-4">
+            <label for="role" class="form-label">Role</label>
+            <select name="role" id="role" class="form-select" required>
+                <option value="TrekkStaff">Trek Staff</option>
+                <option value="User(Trekker)">User(Trekker)</option>   
+            </select>
+        </div>
+        
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+    </form>
+    
+    </div>
 </div>
-{% endif %}
-
-{% if error %}
-<div>
-    <h3>Error</h3>
-    <p>{{ error }}</p>
-</div>
-{% endif %}
     
 {% endblock %}

@@ -6,31 +6,41 @@ Login
 
 {% block content %}
 
-<div class="form-container">
+<div class="card shadow-sm mx-auto mt-5" style="max-width: 400px;">
+    <div class="card-body">
     {% if error %}
-    <div
-        style="color: red; margin-bottom: 15px; padding: 10px; border: 1px solid red; border-radius: 4px; background-color: #ffe6e6;">
+    <div class="alert alert-danger mb-3">
         <strong>Error:</strong> {{ error }}
     </div>
     {% endif %}
 
     <form action="login" method="post">
-        <h2>Login</h2>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="lokesh" required>
+        <h2 class="card-title text-center mb-4">Login</h2>
+        
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="lokesh" required>
+        </div>
 
-        <label for="password">Password</label>
-        <input type="password" placeholder="••••••••" name="password" required>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" placeholder="••••••••" name="password" required>
+        </div>
 
-        <label for="role">Role</label>
-        <select name="role" id="role">
-            <option value="admin">Admin</option>
-            <option value="TrekkStaff">Trek Staff</option>
-            <option value="User(Trekker)">User(Trekker)</option>
-        </select>
-        <button type="submit">Login</button>
+        <div class="mb-4">
+            <label for="role" class="form-label">Role</label>
+            <select name="role" id="role" class="form-select">
+                <option value="admin">Admin</option>
+                <option value="TrekkStaff">Trek Staff</option>
+                <option value="User(Trekker)">User(Trekker)</option>
+            </select>
+        </div>
+        
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
     </form>
-
+    </div>
 </div>
 
 {% endblock %}
