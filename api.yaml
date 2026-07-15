@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Trekking Management Application
+  description: API documentation for the Trekking Management Application routes.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /login:
+    get:
+      summary: Show login form
+      responses:
+        '200':
+          description: Returns the login HTML page
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '302':
+          description: Redirects to the respective dashboard on successful login
+        '401':
+          description: Invalid credentials error
+
+  /register:
+    get:
+      summary: Show registration form
+      responses:
+        '200':
+          description: Returns the registration HTML page
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                name:
+                  type: string
+                contact_details:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: Returns success message and link to login
+        '400':
+          description: Error due to username already existing
+
+  /admin/trek/add:
+    get:
+      summary: Show form to add a new trek
+      responses:
+        '200':
+          description: Returns the HTML form to add a trek
+    post:
+      summary: Add a new trek to the system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                trek_name:
+                  type: string
+                location:
+                  type: string
+                difficulty:
+                  type: string
+                available_slots:
+                  type: integer
+                duration:
+                  type: integer
+                staff_id:
+                  type: integer
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+      responses:
+        '302':
+          description: Redirects to manage treks page on success
+
+  /user/booking/cancel/{booking_id}:
+    post:
+      summary: Cancel an existing booking
+      parameters:
+        - in: path
+          name: booking_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '302':
+          description: Redirects to user dashboard after cancellation
